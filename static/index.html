@@ -54,8 +54,6 @@
                 const res = await fetch("/clima");
                 const data = await res.json();
                 document.getElementById("cidade").innerText = `Cidade: ${data.cidade}`;
-                document.getElementById("lat").innerText = `Latitude: ${data.latitude}`;
-                document.getElementById("lon").innerText = `Longitude: ${data.longitude}`;
                 document.getElementById("temperatura").innerText = `${data.temperatura_agora} °C`;
             } catch (err) {
                 console.error("Erro ao acessar API:", err);
