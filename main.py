@@ -22,13 +22,16 @@ if not os.path.exists("static"):
 # Montar a pasta static para servir arquivos
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+# Endpoint de clima
 @app.get("/clima")
 def clima():
+    # Pegar localização pelo IP
     loc = requests.get("https://ipwho.is").json()
     lat = loc["latitude"]
     lon = loc["longitude"]
     cidade = loc["city"]
 
+    # Consultar API de clima
     url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m"
     resp = requests.get(url).json()
     temperatura_agora = resp["hourly"]["temperature_2m"][0]
