@@ -16,36 +16,69 @@
         }
 
         .card {
-            background: rgba(255, 255, 255, 0.1);
+            background: rgba(255, 255, 255, 0.15);
             padding: 30px 50px;
             border-radius: 20px;
             text-align: center;
             box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
+            width: 350px;
         }
 
         h1 {
             font-size: 2em;
-            margin-bottom: 20px;
+            margin-bottom: 15px;
         }
 
         p {
-            font-size: 1.3em;
-            margin: 10px 0;
+            font-size: 1.2em;
+            margin: 8px 0;
         }
 
         #temperatura {
-            font-size: 3em;
+            font-size: 2.5em;
             font-weight: bold;
+            margin-top: 5px;
+        }
+
+        button {
+            margin-top: 15px;
+            padding: 12px 25px;
+            background: #ffffff;
+            border: none;
+            border-radius: 12px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: 0.2s;
+            font-weight: bold;
+            color: #0072ff;
+        }
+
+        button:hover {
+            background: #dfefff;
+            transform: scale(1.05);
+        }
+
+        #analiseIA {
+            margin-top: 20px;
+            font-size: 1.1em;
+            padding: 10px;
+            background: rgba(255,255,255,0.15);
+            border-radius: 10px;
+            display: none;
         }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>Clima Atual</h1>
+
         <p id="cidade">Carregando...</p>
-        <p id="lat"></p>
-        <p id="lon"></p>
         <p id="temperatura"></p>
+
+        <button onclick="analisarIA()">Analisar com IA</button>
+
+        <p id="analiseIA"></p>
     </div>
 
     <script>
@@ -53,6 +86,7 @@
             try {
                 const res = await fetch("/clima");
                 const data = await res.json();
+
                 document.getElementById("cidade").innerText = `Cidade: ${data.cidade}`;
                 document.getElementById("temperatura").innerText = `${data.temperatura_agora} °C`;
             } catch (err) {
@@ -61,7 +95,22 @@
             }
         }
 
-        // Atualiza imediatamente e depois a cada 60 segundos
+        async function analisarIA() {
+            const boxIA = document.getElementById("analiseIA");
+            boxIA.style.display = "block";
+            boxIA.innerText = "Analisando...";
+
+            try {
+                const res = await fetch("/clima-ia");
+                const data = await res.json();
+
+                boxIA.innerText = data.analise_da_ia;
+            } catch (err) {
+                console.error("Erro IA:", err);
+                boxIA.innerText = "Erro ao gerar análise da IA.";
+            }
+        }
+
         atualizarClima();
         setInterval(atualizarClima, 60000);
     </script>
