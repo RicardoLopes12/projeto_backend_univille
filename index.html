@@ -3,20 +3,69 @@
 <head>
     <meta charset="UTF-8">
     <title>Clima Atual</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(to right, #00c6ff, #0072ff);
+            color: #fff;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+        }
+
+        .card {
+            background: rgba(255, 255, 255, 0.1);
+            padding: 30px 50px;
+            border-radius: 20px;
+            text-align: center;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            font-size: 2em;
+            margin-bottom: 20px;
+        }
+
+        p {
+            font-size: 1.3em;
+            margin: 10px 0;
+        }
+
+        #temperatura {
+            font-size: 3em;
+            font-weight: bold;
+        }
+    </style>
 </head>
 <body>
-    <h1>Clima Atual</h1>
-    <p id="cidade">Carregando...</p>
-    <p id="temperatura"></p>
+    <div class="card">
+        <h1>Clima Atual</h1>
+        <p id="cidade">Carregando...</p>
+        <p id="lat"></p>
+        <p id="lon"></p>
+        <p id="temperatura"></p>
+    </div>
 
     <script>
-        fetch("http://127.0.0.1:8000/clima")
-            .then(res => res.json())
-            .then(data => {
-                document.getElementById("cidade").innerText = "Cidade: " + data.cidade;
-                document.getElementById("temperatura").innerText = "Temperatura: " + data.temperatura_agora + "°C";
-            })
-            .catch(err => console.error("Erro ao acessar API:", err));
+        async function atualizarClima() {
+            try {
+                const res = await fetch("/clima");
+                const data = await res.json();
+                document.getElementById("cidade").innerText = `Cidade: ${data.cidade}`;
+                document.getElementById("lat").innerText = `Latitude: ${data.latitude}`;
+                document.getElementById("lon").innerText = `Longitude: ${data.longitude}`;
+                document.getElementById("temperatura").innerText = `${data.temperatura_agora} °C`;
+            } catch (err) {
+                console.error("Erro ao acessar API:", err);
+                document.getElementById("cidade").innerText = "Erro ao carregar dados";
+            }
+        }
+
+        // Atualiza imediatamente e depois a cada 60 segundos
+        atualizarClima();
+        setInterval(atualizarClima, 60000);
     </script>
 </body>
 </html>
