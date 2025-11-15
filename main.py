@@ -86,8 +86,8 @@ def clima_ia():
 
         # IA
         prompt = f"""
-        Relatório interestelar: {cidade} apresenta {temperatura}°C.
-        Analise o clima como um alien tentando entender humanos: diga se está quente, frio ou agradável e dê uma recomendação engraçada porém em 4 linhas.
+        Relatório interestelar: {cidade} registra {temperatura}°C.
+Faça uma análise climática como um alien completamente confuso com costumes humanos: diga se está quente, frio ou agradável, e dê uma recomendação hilária em 2 linhas — como se fosse um relatório científico absurdo sobre criaturas terrestres.
         """
 
         resposta = client.chat.completions.create(
