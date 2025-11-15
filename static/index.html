@@ -1,75 +1,12 @@
 <!DOCTYPE html>
 <html lang="pt-br">
+<link rel="stylesheet" href="/static/style.css">
 <head>
     <meta charset="UTF-8">
     <title>Clima Atual</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background: linear-gradient(to right, #00c6ff, #0072ff);
-            color: #fff;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-            margin: 0;
-        }
-
-        .card {
-            background: rgba(255, 255, 255, 0.15);
-            padding: 30px 50px;
-            border-radius: 20px;
-            text-align: center;
-            box-shadow: 0 8px 20px rgba(0,0,0,0.3);
-            backdrop-filter: blur(6px);
-            width: 350px;
-        }
-
-        h1 {
-            font-size: 2em;
-            margin-bottom: 15px;
-        }
-
-        p {
-            font-size: 1.2em;
-            margin: 8px 0;
-        }
-
-        #temperatura {
-            font-size: 2.5em;
-            font-weight: bold;
-            margin-top: 5px;
-        }
-
-        button {
-            margin-top: 15px;
-            padding: 12px 25px;
-            background: #ffffff;
-            border: none;
-            border-radius: 12px;
-            font-size: 1em;
-            cursor: pointer;
-            transition: 0.2s;
-            font-weight: bold;
-            color: #0072ff;
-        }
-
-        button:hover {
-            background: #dfefff;
-            transform: scale(1.05);
-        }
-
-        #analiseIA {
-            margin-top: 20px;
-            font-size: 1.1em;
-            padding: 10px;
-            background: rgba(255,255,255,0.15);
-            border-radius: 10px;
-            display: none;
-        }
-    </style>
 </head>
 <body>
+    <img src="/static/alien.gif" alt="">
     <div class="card">
         <h1>Clima Atual</h1>
 
@@ -81,38 +18,6 @@
         <p id="analiseIA"></p>
     </div>
 
-    <script>
-        async function atualizarClima() {
-            try {
-                const res = await fetch("/clima");
-                const data = await res.json();
-
-                document.getElementById("cidade").innerText = `Cidade: ${data.cidade}`;
-                document.getElementById("temperatura").innerText = `${data.temperatura_agora} °C`;
-            } catch (err) {
-                console.error("Erro ao acessar API:", err);
-                document.getElementById("cidade").innerText = "Erro ao carregar dados";
-            }
-        }
-
-        async function analisarIA() {
-            const boxIA = document.getElementById("analiseIA");
-            boxIA.style.display = "block";
-            boxIA.innerText = "Analisando...";
-
-            try {
-                const res = await fetch("/clima-ia");
-                const data = await res.json();
-
-                boxIA.innerText = data.analise_da_ia;
-            } catch (err) {
-                console.error("Erro IA:", err);
-                boxIA.innerText = "Erro ao gerar análise da IA.";
-            }
-        }
-
-        atualizarClima();
-        setInterval(atualizarClima, 60000);
-    </script>
+    <script src="/static/script.js"></script>
 </body>
 </html>

@@ -7,7 +7,7 @@ import os
 from openai import OpenAI
 
 # --- CONFIGURAÇÃO DA IA ---
-client = OpenAI(api_key="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")
+client = OpenAI(api_key="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")
 
 app = FastAPI()
 
@@ -23,7 +23,6 @@ app.add_middleware(
 if not os.path.exists("static"):
     os.makedirs("static")
 
-# Montar a pasta static para servir arquivos
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
@@ -32,21 +31,34 @@ app.mount("/static", StaticFiles(directory="static"), name="static")
 # --------------------
 @app.get("/clima")
 def clima():
-    loc = requests.get("https://ipwho.is").json()
-    lat = loc["latitude"]
-    lon = loc["longitude"]
-    cidade = loc["city"]
+    try:
+        # Pegando localização com timeout
+        loc = requests.get("https://ipwho.is", timeout=3).json()
 
-    url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m"
-    resp = requests.get(url).json()
-    temperatura_agora = resp["hourly"]["temperature_2m"][0]
+        lat = loc.get("latitude")
+        lon = loc.get("longitude")
+        cidade = loc.get("city")
 
-    return {
-        "cidade": cidade,
-        "latitude": lat,
-        "longitude": lon,
-        "temperatura_agora": temperatura_agora
-    }
+        if lat is None or lon is None:
+            return {"erro": "Não foi possível obter a localização."}
+
+        url = (
+            "https://api.open-meteo.com/v1/forecast?"
+            f"latitude={lat}&longitude={lon}&hourly=temperature_2m"
+        )
+
+        resp = requests.get(url, timeout=3).json()
+        temperatura = resp["hourly"]["temperature_2m"][0]
+
+        return {
+            "cidade": cidade,
+            "latitude": lat,
+            "longitude": lon,
+            "temperatura_agora": temperatura
+        }
+
+    except Exception as e:
+        return {"erro": f"Falha ao carregar clima: {str(e)}"}
 
 
 # --------------------
@@ -54,46 +66,54 @@ def clima():
 # --------------------
 @app.get("/clima-ia")
 def clima_ia():
-    # Pegar localização
-    loc = requests.get("https://ipwho.is").json()
-    lat = loc.get("latitude")
-    lon = loc.get("longitude")
-    cidade = loc.get("city")
+    try:
+        loc = requests.get("https://ipwho.is", timeout=3).json()
 
-    url = (
-        "https://api.open-meteo.com/v1/forecast?"
-        f"latitude={lat}&longitude={lon}&hourly=temperature_2m"
-    )
-    resp = requests.get(url).json()
+        lat = loc.get("latitude")
+        lon = loc.get("longitude")
+        cidade = loc.get("city")
 
-    temperatura_agora = resp["hourly"]["temperature_2m"][0]
+        if lat is None or lon is None:
+            return {"erro": "Não foi possível obter a localização."}
 
-    # IA
-    prompt = f"""
-    Relatório interestelar: {cidade} apresenta {temperatura_agora}°C.
-Analise o clima como um alien tentando entender humanos: diga se está quente, frio ou agradável e dê uma recomendação engraçada porém em 4 linhas.
+        url = (
+            "https://api.open-meteo.com/v1/forecast?"
+            f"latitude={lat}&longitude={lon}&hourly=temperature_2m"
+        )
 
-    """
+        resp = requests.get(url, timeout=3).json()
+        temperatura = resp["hourly"]["temperature_2m"][0]
 
-    resposta = client.chat.completions.create(
-        model="gpt-4o-mini",
-        messages=[
-            {"role": "user", "content": prompt}
-        ]
-    )
+        # IA
+        prompt = f"""
+        Relatório interestelar: {cidade} apresenta {temperatura}°C.
+        Analise o clima como um alien tentando entender humanos: diga se está quente, frio ou agradável e dê uma recomendação engraçada porém em 4 linhas.
+        """
 
-    analise = resposta.choices[0].message.content
+        resposta = client.chat.completions.create(
+            model="gpt-4o-mini",
+            messages=[{"role": "user", "content": prompt}]
+        )
 
-    return {
-        "cidade": cidade,
-        "temperatura": temperatura_agora,
-        "analise_da_ia": analise
-    }
+        analise = resposta.choices[0].message.content
+
+        return {
+            "cidade": cidade,
+            "temperatura": temperatura,
+            "analise_da_ia": analise,
+        }
+
+    except Exception as e:
+        return {"erro": f"Falha ao gerar análise da IA: {str(e)}"}
+
 
 # --------------------
 # 3) SERVIR O HTML  
 # --------------------
 @app.get("/", response_class=HTMLResponse)
 def home():
-    with open("static/index.html", "r", encoding="utf-8") as f:
-        return f.read()
+    try:
+        with open("static/index.html", "r", encoding="utf-8") as f:
+            return f.read()
+    except:
+        return "<h1>Arquivo index.html não encontrado na pasta /static</h1>"
