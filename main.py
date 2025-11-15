@@ -3,11 +3,13 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 import requests
+from dotenv import load_dotenv
 import os
 from openai import OpenAI
+load_dotenv("chaveapi.env")
 
 # --- CONFIGURAÇÃO DA IA ---
-client = OpenAI(api_key="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")
+client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 
@@ -64,11 +66,11 @@ def clima():
 # --------------------
 # 2) ENDPOINT DE ANÁLISE POR IA  
 # --------------------
+
 @app.get("/clima-ia")
 def clima_ia():
     try:
         loc = requests.get("https://ipwho.is", timeout=3).json()
-
         lat = loc.get("latitude")
         lon = loc.get("longitude")
         cidade = loc.get("city")
@@ -76,18 +78,47 @@ def clima_ia():
         if lat is None or lon is None:
             return {"erro": "Não foi possível obter a localização."}
 
-        url = (
-            "https://api.open-meteo.com/v1/forecast?"
-            f"latitude={lat}&longitude={lon}&hourly=temperature_2m"
-        )
-
+        url = f"https://api.open-meteo.com/v1/forecast?latitude={lat}&longitude={lon}&hourly=temperature_2m,weather_code"
         resp = requests.get(url, timeout=3).json()
-        temperatura = resp["hourly"]["temperature_2m"][0]
 
-        # IA
+        temperatura = resp["hourly"]["temperature_2m"][0]
+        weather_code = resp["hourly"]["weather_code"][0]
+
+        codigos = {
+             0: "céu limpo",
+        1: "poucas nuvens",
+        2: "parcialmente nublado",
+        3: "nublado",
+        45: "nevoeiro",
+        48: "geada",
+        51: "chuva fraca",
+        53: "chuva moderada",
+        55: "chuva intensa",
+        56: "chuva congelante fraca",
+        57: "chuva congelante forte",
+        61: "chuva leve",
+        63: "chuva moderada",
+        65: "chuva forte",
+        66: "chuva congelante leve",
+        67: "chuva congelante forte",
+        71: "neve leve",
+        73: "neve moderada",
+        75: "neve forte",
+        77: "granizo",
+        80: "chuva de pancadas leve",
+        81: "chuva de pancadas moderada",
+        82: "chuva de pancadas forte",
+        85: "neve de pancadas leve",
+        86: "neve de pancadas forte",
+        95: "tempestade leve ou moderada",
+        96: "tempestade com granizo leve",
+        99: "tempestade com granizo forte"
+}
+        descricao = codigos.get(weather_code, "condição desconhecida")
+
         prompt = f"""
-        Relatório interestelar: {cidade} registra {temperatura}°C.
-Faça uma análise climática como um alien completamente confuso com costumes humanos: diga se está quente, frio ou agradável, e dê uma recomendação hilária em 2 linhas — como se fosse um relatório científico absurdo sobre criaturas terrestres.
+        Relatório interestelar: {cidade} registra {temperatura}°C com clima {descricao}.
+        Analise o clima como um alien completamente confuso com costumes humanos: diga se está quente, frio ou agradável, e dê uma recomendação hilária em 2 linhas.
         """
 
         resposta = client.chat.completions.create(
@@ -100,11 +131,13 @@ Faça uma análise climática como um alien completamente confuso com costumes h
         return {
             "cidade": cidade,
             "temperatura": temperatura,
+            "descricao_clima": descricao,
             "analise_da_ia": analise,
         }
 
     except Exception as e:
         return {"erro": f"Falha ao gerar análise da IA: {str(e)}"}
+
 
 
 # --------------------
