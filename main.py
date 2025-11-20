@@ -8,12 +8,12 @@ import os
 from openai import OpenAI
 load_dotenv("chaveapi.env")
 
-# --- CONFIGURAÇÃO DA IA ---
+
 client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
 
 app = FastAPI()
 
-# Permitir que qualquer front-end acesse a API
+# Permitir que o front-end acesse a API
 app.add_middleware(
     CORSMiddleware,
     allow_origins=["*"],
@@ -27,10 +27,8 @@ if not os.path.exists("static"):
 
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+ 
 
-# --------------------
-# 1) ENDPOINT NORMAL DE CLIMA  
-# --------------------
 @app.get("/clima")
 def clima():
     try:
@@ -63,9 +61,7 @@ def clima():
         return {"erro": f"Falha ao carregar clima: {str(e)}"}
 
 
-# --------------------
-# 2) ENDPOINT DE ANÁLISE POR IA  
-# --------------------
+
 
 @app.get("/clima-ia")
 def clima_ia():
@@ -140,9 +136,7 @@ def clima_ia():
 
 
 
-# --------------------
-# 3) SERVIR O HTML  
-# --------------------
+
 @app.get("/", response_class=HTMLResponse)
 def home():
     try:
