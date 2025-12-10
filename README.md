@@ -1,7 +1,7 @@
 # Projeto Back End Univille
 
 ## Sobre
-Backend criado como parte do projeto universitário — implementado em Python com FastAPI. Este repositório contém o servidor, configuração para servir arquivos estáticos e integração com APIs externas (via `requests` / SDKs).
+Backend criado como parte do projeto universitário — implementado em Python com FastAPI. Este repositório contém o servidor, configuração para servir arquivos estáticos e integração com APIs externas (via `requests` / SDKs)
 
 
 ---
