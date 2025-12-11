@@ -135,7 +135,7 @@ def clima_ia():
 
         prompt = f"""
         Na cidade de {cidade}, a temperatura atual é {temperatura}°C com {descricao}.
-        Analise de forma divertida como se fosse um alien confuso em 5 linhas
+        Analise de forma divertida como se fosse um alien confuso em 3 linhas
         """
 
         resposta = client.responses.create(
